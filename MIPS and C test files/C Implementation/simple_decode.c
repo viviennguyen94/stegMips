@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 int main() {
-  FILE *wav_file = fopen("output.wav", "r");     // only read
-  FILE *output_file = fopen("decoded_message.txt", "w+"); // only write
+  FILE *wav_file = fopen("output2.wav", "r");     // only read
+  FILE *output_file = fopen("decoded_message2.txt", "w+"); // only write
   int w, o, i, bytes_written = 0;
 
   // skip all of the headers
