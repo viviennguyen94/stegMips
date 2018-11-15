@@ -26,19 +26,12 @@
 
 # Print RIFF
 
-	li	$v0, 4
-	la	$a0, WavHeader
-	la	$a0, 0($a0)
+	li	$v0, 1
+	la	$s0, WavHeader
+	lw	$a0, 40($s0)
 	syscall	
 	
-	la	$a0, 4($a0)	
-	li	$v0, 36
-	syscall	
-	
-	la	$a0, 4($a0)	
-	li	$v0, 4
-	syscall	
-	
+# Close file
 done:
 	li	$v0, 16			# 16=close file
 	add	$a0, $s0, $0		# $s0 contains fd
