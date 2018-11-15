@@ -24,16 +24,23 @@
 	li	$a2, 44			# Read 4 bytes
 	syscall
 
-# Print RIFF
+# Print Riff
 
-	li	$v0, 1
-	la	$s0, WavHeader
-	lw	$a0, 40($s0)
+	li	$v0, 4			# Print string instuction
+	la	$s0, WavHeader		# load WavHeader into s0
+	la	$a0, 0($s0)		# load address of s0 at offset 0
+	syscall	
+	
+# Print byte 40
+
+	li	$v0, 1			# Print int instruction
+	la	$s0, WavHeader		# load WavHeader into s0
+	lw	$a0, 40($s0)		# load word into a0
 	syscall	
 	
 # Close file
 done:
-	li	$v0, 16			# 16=close file
+	li	$v0, 16			# 16 = close file
 	add	$a0, $s0, $0		# $s0 contains fd
 	syscall				# close file
 	
