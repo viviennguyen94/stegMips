@@ -3,7 +3,10 @@
 		.asciiz "service-bell.wav" #filename
 		.align 2
 	WavHeader:
-		.word 44
+		.space 44
+		.align 2
+	WavData:
+		.space 4000000
 		.align 2
 .text
 
@@ -31,13 +34,22 @@
 	la	$a0, 0($s0)		# load address of s0 at offset 0
 	syscall	
 	
-# Print byte 40
-
-	li	$v0, 1			# Print int instruction
+# Print byte 40 and store in temporary variable
 	la	$s0, WavHeader		# load WavHeader into s0
-	lw	$a0, 40($s0)		# load word into a0
-	syscall	
+	lw	$s7, 40($s0)		# load word into a0
 	
+	li 	$v0, 1
+	move 	$a0, $s7
+	syscall
+	
+# navigate through 44 bytes in file to get to data file (by setting address of WAVdata to 0x10010040) 
+# copy $s7 so that WAVheader only stores data file size (bytes)
+#	li	$v0, 14			# 14 = read from file
+#	move 	$a0, $s0		# place s0 into a0
+#	la	$a1, WavData		# WavHeader holds hex
+#	la	$a2, 			# Read 4 bytes
+#	syscall
+
 # Close file
 done:
 	li	$v0, 16			# 16 = close file

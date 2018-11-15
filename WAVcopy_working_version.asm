@@ -58,6 +58,5 @@ done:
 	syscall				# close file
 	
 # Exit Gracefully
-
 	li	$v0, 10
 	syscall
