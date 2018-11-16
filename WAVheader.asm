@@ -1,14 +1,17 @@
 .data
+	hello:
+		.asciiz "hello"
+		#.align 2
+	
 	file: 
 		.asciiz "service-bell.wav" #filename
 		#.align 2
-		
+	
+			
 	WavHeader:
 		.word 44
 		#.align 2
-	hello:
-		.asciiz "h"
-		#.align 2
+	
 .text
 
 # Open file
@@ -35,23 +38,35 @@
 	la	$s0, WavHeader		# load WavHeader into s0
 	lb	$a0, 46($s0)		# load address of s0 at offset 0
 	syscall	
+	move	$t4, $a0
 	
 	# new line character
 	li $a0, 10		# same as before, except we are printing ASCII 10, which is
 	li $v0, 11		# a new line character. 
 	syscall
-	
+
 	li	$v0, 4			# Print string instuction
 	la	$a0, hello		# load address of s0 at offset 0
 	syscall	
 
+	# splitting hex value of letter 
 	move 	$t1, $a0 		# move text byte to $t1	
-	lw	$t1, 0($t1)		
+	lb	$t1, 0($t1)		# text byte stored in $t1
 	srl	$t2, $t1, 4		# isolate, shift first 4 bits in text byte
 	andi	$t3, $t1, 0x0f		# isolate last 4 bits in text byte
 	
+	# putting first 4 bits of text byte and clearing out least 4 significant bits of wav byte 
+	and	$t4, $t4, 0xf0
+	or	$t4, $t4, $t2
+
+	sb	$t4, 46($s0)		# change byte in wav file
 	
-	
+	# putting last 4 bits of text byte and clearing out least 4 significant bits of wav byte  
+	lb	$t4, 48($s0)		# move next 2 bytes in wav
+	andi 	$t4, $t4, 0xf0		# clear out 
+	or 	$t4, $t4, $t3 
+	sb	$t4, 48($s0)
+
 	# new line character
 	li $a0, 10		# same as before, except we are printing ASCII 10, which is
 	li $v0, 11		# a new line character. 
