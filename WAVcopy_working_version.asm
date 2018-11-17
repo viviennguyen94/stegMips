@@ -4,7 +4,7 @@
 		.align 2
 	
 	message:
-		.asciiz "LETS GO TO KOIZI, BRAD!!//"
+		.asciiz "LETS GO TO KOIZI, BRAD!!//" #must have // at end of message to prevent decoding more than just message
 		.align 2
 	
 	WavHeader:
