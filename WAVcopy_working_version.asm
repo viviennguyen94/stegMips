@@ -3,6 +3,10 @@
 		.asciiz "service-bell.wav" #filename
 		.align 2
 	
+	message:
+		.asciiz "LETS GO TO KOIZI, BRAD!!//"
+		.align 2
+	
 	WavHeader:
 		.space 44
 		.align 2
@@ -43,13 +47,64 @@ main:
 	syscall
 	
 # Close file
-done:
+readClose:
 	li	$v0, 16			# 16 = close file
 	move	$a0, $s0		# move file descripter to a0
 	syscall				# close file
+
+strLen:
+	la	$s0, message		# load string from message
+	add	$t0, $t0, $zero		# initialize count to 0
+loop:
+	lb	$t1, 0($s0)		# load chr byte into t1
+	beqz	$t1, exit		# if chr is \0, stop
+	addi	$t0, $t0, 1		# add 1 to count t0
+	addi	$s0, $s0, 1		# point to next chr
+	j	loop			# loops
+exit:
+	
+#PREP DATA AND STRING TO ENCODE
+
+	la	$s0, WavData		# load WavHeader into s0
+	la	$s1, message		# load address of s0 at offset 0
+	#addi	$s0, $s0, 44		# increment to 44th byte
+	#li	$s3, 5			# 5 counts
+
+ENCODE:
+#SEPARATING THE CHARACTER 
+		
+	# splitting hex value of letter 
+	
+	lb	$t1, 0($s1)		# text byte stored in $t1
+	srl	$t2, $t1, 4		# isolate, shift first 4 bits in text byte
+	andi	$t3, $t1, 0x0f		# isolate last 4 bits in text byte
+	
+	# increment to first byte
+	addi	$s0, $s0, 2		
+	
+	# putting first 4 bits of text byte and clearing out least 4 significant bits of wav byte 
+	lb	$t4, 0($s0)		# load first byte into t4
+	andi	$t4, $t4, 0xf0		# clear last 4 lsb of t4 
+	or	$t4, $t4, $t2		# insert first half of letter into t4
+	sb	$t4, 0($s0)		# change byte in wav file
+	
+	# increment to second byte
+	addi	$s0, $s0, 2		
+	
+	# putting last 4 bits of text byte and clearing out least 4 significant bits of wav byte  
+	lb	$t4, 0($s0)		# move next 2 bytes in wav
+	andi 	$t4, $t4, 0xf0		# clear out 
+	or 	$t4, $t4, $t3 		# insert last half of letter into t4
+	sb	$t4, 0($s0)		# store back into data
+	
+	# branch check
+	subi	$t0, $t0, 1
+	beqz	$t0, write_open
+	addi	$s1, $s1, 1
+	j	ENCODE
 	
 #open file to write to
-file_open:
+write_open:
     	li 	$v0, 13			# 13 = file open
     	la 	$a0, output_file	# open/create output file
     	li 	$a1, 1			# a1 = flags = 1 (for write)
@@ -58,7 +113,7 @@ file_open:
     
     		
 #write file
-file_write:
+write_file:
 	
 	#write header
     	move 	$a0, $v0  		# file write requieres file descriptor in $a0
@@ -66,6 +121,8 @@ file_write:
     	la 	$a1, WavHeader		# a1 = address of output buffer = WavHeader
     	li 	$a2, 44			# a2 = 44 bytes
     	syscall
+    	
+    	la	$s1, WavHeader
     	
     	#write data
     	li 	$v0, 15			# 15 = write to file
